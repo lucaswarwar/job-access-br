@@ -11,7 +11,7 @@ library(ggthemes)     # data viz themes
 library(hrbrthemes)   # data viz themes
 library(sf)           # read and manipulate spatial data
 library(data.table)   # fast data wrangling
-library(collapse)     # insanely fast data transformation
+#library(collapse)     # insanely fast data transformation
 library(foreign)      # read data in strange formats
 library(magrittr)     # pipe operator
 library(ggmap)        # Google API
@@ -47,7 +47,9 @@ library(opentripplanner) # Use OTP from R: https://github.com/ITSLeeds/opentripp
 library(h3jsr)        # h3 hexagonons
 library(bit64)        # viz large numbers
 
-# Set some options --------------------
+# Set some options and functions --------------------
+
+source('fun.R')
 
 options(scipen = 99999)
 
