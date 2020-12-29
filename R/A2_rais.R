@@ -4,8 +4,8 @@
 
 source('setup.R')
 
-year <- '2017'
-
+year <- '2018'
+metro <- 'for'
 ### 1. Read data of firms (RAIS ESTAB) ----------------
 
 # Function to read RAIS data on a given year
@@ -27,8 +27,8 @@ read_rais <- function(year, metros = 'all'){
       "id_estab","cnpj_raiz","logradouro","bairro",
       "codemun","cep", "subs_ibge", "qt_vinc_ativos"))
   
-  df_estab <- data.table::setDT(df_estab, key='id_estab')[qt_vinc_ativos != 0 & 
-                                                          as.character(codemun) %in% as.character(df_metro$cd_ibge)] %>% unique() 
+  df_estab <- data.table::setDT(df_estab, key='id_estab')[qt_vinc_ativos > 0 & 
+                                                          as.character(codemun) %in% as.character(df_metro$cd_6)] %>% unique() 
   
   # Combine address columns and drop columns
   df_estab <- df_estab[, address := paste(logradouro,bairro, sep = " - ")]
@@ -42,7 +42,7 @@ read_rais <- function(year, metros = 'all'){
   
   filtro <- df_estab %>% 
    dplyr::group_by(id_estab) %>% 
-  dplyr::mutate(filtro=dplyr::n_distinct(endereco)) %>% 
+  dplyr::mutate(filtro=dplyr::n_distinct(address)) %>% 
   dplyr::ungroup() %>% dplyr::filter(filtro>1)
   
   df_estab <- df_estab[id_estab %nin% filtro$id_estab]
