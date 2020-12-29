@@ -66,6 +66,8 @@ purrr::walk(.x = metros,.f = get_everyone)
 
 anonimize <- function(metro){
   
+  message('Working on, ', metro)
+  
   people <- readr::read_rds(here::here('data',metro,paste0('people_',metro,'.rds'))) %>% data.table::setDT(key = 'cpf')
   panel  <- readr::read_rds(here::here('data',metro,paste0('panel_',metro,'.rds'))) %>% data.table::setDT(key = 'cpf')
   
