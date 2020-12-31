@@ -39,8 +39,7 @@ read_cadunico <- function(year, metros = 'all'){
     df_familia <- df_familia[, nu_logradouro_fam := ifelse(!is.na(nu_logradouro_fam),as.character(nu_logradouro_fam),
                                                            ds_complemento_fam)]
   
-    df_familia <- df_familia[, address := paste0(no_tip_logradouro_fam," ",no_logradouro_fam,", ",nu_logradouro_fam," - ",no_localidade_fam)]
-    df_familia <- df_familia[, !c('no_tip_logradouro_fam','no_logradouro_fam','nu_logradouro_fam','no_localidade_fam','ds_complemento_fam','no_tit_logradouro_fam')]
+    df_familia <- df_familia[, !c('ds_complemento_fam','no_tit_logradouro_fam')]
   
     # Set key
     data.table::setkey(df_familia, key = 'co_familiar_fam')
@@ -131,7 +130,10 @@ read_cadunico <- function(year, metros = 'all'){
                                        dt_upd=dt_atualizacao_fam,
                                        remmd_fam=vl_renda_media_fam,
                                        cd_ibge = cd_ibge_cadastro,
-                                       address,
+                                       tp_logradouro = no_tip_logradouro_fam,
+                                       no_logradouro = no_logradouro_fam,
+                                       nu_logradouro = nu_logradouro_fam,
+                                       localidade = no_localidade_fam,
                                        cep = nu_cep_logradouro_fam) %>% 
     data.table::setDT(df_cad, key = 'cpf')
   
@@ -154,3 +156,4 @@ read_cadunico <- function(year, metros = 'all'){
 ### 4. Apply functions
 years <- as.character(seq(2011,2019,1))
 purrr::walk(.x = years, .f = read_cadunico)
+#read_cadunico(year = '2019',metros = c('rjo','spo','poa','cur'))

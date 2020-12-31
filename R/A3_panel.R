@@ -3,7 +3,8 @@
 # Load libraries --------
 
 source('setup.R')
-
+#year <- '2018'
+#metro <- 'spo'
 
 get_everyone <- function(metro){
   
@@ -15,7 +16,8 @@ get_everyone <- function(metro){
     
     df <- readr::read_rds(here::here('data-raw',metro,'CADUnico',x))
     df <- data.table::setDT(df, key = 'cpf')[,.(cpf,gend,race,dtbirth,
-                                                address,cd_ibge,cep,dt_upd)] %>% unique()
+                                                tp_logradouro,no_logradouro,nu_logradouro,
+                                                localidade,cd_ibge,cep,dt_upd)] %>% unique()
     df <- df[!is.na(cpf)]
     
     return(df)
@@ -24,18 +26,121 @@ get_everyone <- function(metro){
   df_cpf <- purrr::map(.x = files,.f = read_cad) %>% data.table::rbindlist() %>% unique()
   df_cpf <- data.table::setDT(df_cpf, key = 'cpf')
   
-  df_cpf <- df_cpf[, address := gsub("00000000000000","",address)] %>% unique()
-  df_cpf <- df_cpf[, address := gsub("0000000000000","",address)] %>% unique()
-  df_cpf <- df_cpf[, address := gsub("000000000000","",address)] %>% unique()
+  df_cpf <- df_cpf[, nu_logradouro := gsub("00000000000000","",nu_logradouro)] %>% unique()
+  df_cpf <- df_cpf[, nu_logradouro := gsub("0000000000000","",nu_logradouro)] %>% unique()
+  df_cpf <- df_cpf[, nu_logradouro := gsub("000000000000","",nu_logradouro)] %>% unique()
+  df_cpf <- df_cpf[, nu_logradouro := gsub("00000000000","",nu_logradouro)] %>% unique()
+  df_cpf <- df_cpf[, nu_logradouro := gsub("0000000000","",nu_logradouro)] %>% unique()
+  df_cpf <- df_cpf[, nu_logradouro := gsub("000000000","",nu_logradouro)] %>% unique()
+  df_cpf <- df_cpf[, nu_logradouro := gsub("00000","",nu_logradouro)] %>% unique()
+  
+  
+  tipos <- df_cpf[,.(n=.N),by = .(tp_logradouro)]
+  
+  df_cpf <- df_cpf[, tp_logradouro := data.table::fcase(
+    tp_logradouro == "RUA" | tp_logradouro == "10A" |tp_logradouro == "R" | 
+    tp_logradouro == "R." | stringr::str_detect(tp_logradouro,"RUA"), "RUA",
+    tp_logradouro == "AVENIDA" | tp_logradouro == "AV" |tp_logradouro == "AV." | 
+    tp_logradouro == "AVE" | stringr::str_detect(tp_logradouro,"AVENIDA"), "AVENIDA",
+    tp_logradouro == 'ALA' | tp_logradouro == 'ALAMEDA','ALAMEDA',
+    tp_logradouro == 'BEC' | tp_logradouro == 'BECO','BECO',
+    tp_logradouro == 'TRA' | tp_logradouro == 'TRAVESSA','TRAVESSA',
+    tp_logradouro == 'DIS' | tp_logradouro == 'DISTRITO','DISTRITO',
+    tp_logradouro == 'ACE' | stringr::str_detect(tp_logradouro,"ACESSO"),'ACESSO',
+    tp_logradouro == 'BL' | tp_logradouro == 'BLO' | tp_logradouro == 'BLOCO','BLOCO',
+    stringr::str_detect(tp_logradouro,"CONJUNTO"),'CONJUNTO',
+    tp_logradouro == 'EST' | stringr::str_detect(tp_logradouro,"ESTRADA"),'ESTRADA',
+    tp_logradouro == 'SIT' | stringr::str_detect(tp_logradouro,"SITIO"),'SITIO',
+    tp_logradouro == 'FAZ' | stringr::str_detect(tp_logradouro,"FAZENDA"),'FAZENDA',
+    tp_logradouro == 'CHA' | stringr::str_detect(tp_logradouro,"CHACARA"),'CHACARA',
+    tp_logradouro == 'JAR' | tp_logradouro == 'JD' | stringr::str_detect(tp_logradouro,"JARDIM"),'JARDIM',
+    tp_logradouro == 'LOT' | stringr::str_detect(tp_logradouro,"LOTEAMENTO"),'LOTEAMENTO',
+    tp_logradouro == 'PRA' | tp_logradouro == 'PC' | stringr::str_detect(tp_logradouro,"PRACA"),'PRACA',
+    tp_logradouro == 'QUA' | stringr::str_detect(tp_logradouro,"QUADRA"),'QUADRA',
+    tp_logradouro == 'RES' | stringr::str_detect(tp_logradouro,"RESIDENCIAL"),'RESIDENCIAL',
+    tp_logradouro == 'ROD' | stringr::str_detect(tp_logradouro,"RODOVIA"),'RODOVIA',
+    stringr::str_detect(tp_logradouro,"CONDOMINIO"),'CONDOMINIO',
+    tp_logradouro == 'VIL' | stringr::str_detect(tp_logradouro,"VILA"),'VILA',
+    tp_logradouro == 'VIE' | stringr::str_detect(tp_logradouro,"VIELA"),'VIELA',
+    tp_logradouro == 'COL' | stringr::str_detect(tp_logradouro,"COLONIA"),'COLONIA')]
+  
+  df_cpf <- df_cpf[, no_logradouro := gsub("01","1",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("02","2",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("03","3",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("04","4",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("05","5",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("06","6",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("07","7",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("08","8",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("09","9",no_logradouro)] 
+  
+  df_cpf <- df_cpf[, no_logradouro := gsub("II","2",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("III","3",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("VII","7",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("VIII","8",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XII","12",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XIII","13",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XIV","14",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XV","15",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XVI","16",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XVII","17",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XVIII","18",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XIX","19",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XXI","21",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XXII","22",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XXIII","23",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XXIV","24",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XXV","25",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XXVI","26",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XXVII","27",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XXVIII","28",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XXIX","29",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XXX","30",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("XX","20",no_logradouro)] 
+  
+  df_cpf <- df_cpf[, no_logradouro := gsub("^CEL \\s+","CORONEL ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^MAJ \\s+","MAJOR ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^CAP \\s+","CAPITAO ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^TN \\s+","TENENTE ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^TEN \\s+","TENENTE ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^MAL \\s+","MARECHAL ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^GAL \\s+","GENERAL ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^DR  \\s+","DOUTOR ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^PROF \\s+","PROFESSOR ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^ENG \\s+","ENGENHEIRO ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^PE \\s+","PADRE ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^FR \\s+","FREI ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^DES \\s+","DESEMBARGADOR ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^VISC \\s+","VISCONDE ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^DUQ \\s+","DUQUE ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^BR \\s+","BARAO ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^DQ \\s+","DUQUE ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^COM \\s+","COMENDADOR ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^STO \\s+","SANTO ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^STA \\s+","SANTA ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^S \\s+","SAO ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^PRES \\s+","PRESIDENTE ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^GOV \\s+","GOVERNADOR ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^PREF \\s+","PREFEITO ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^SEN \\s+","SENADOR ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^DEP \\s+","DEPUTADO ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^VER \\s+","VEREADOR ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("^BRIG \\s+","BRIGADEIRO ",no_logradouro)] 
+  df_cpf <- df_cpf[, no_logradouro := gsub("SDO","SEM DENOMINACAO",no_logradouro)] 
+  
+  df_cpf <- df_cpf[, nu_logradouro := gsub("S/N","SN",nu_logradouro)]
+  
   df_cpf <- df_cpf[, dt_upd  := stringr::str_sub(dt_upd,1,4)]
   
   df_cpf <- df_cpf %>% 
-    dplyr::group_by(cpf, address) %>% 
+    dplyr::group_by(cpf,tp_logradouro,no_logradouro,nu_logradouro,localidade) %>% 
     dplyr::mutate(year = min(as.numeric(dt_upd))) %>% 
     dplyr::ungroup() %>% 
     dplyr::select(-dt_upd) %>% 
     data.table::setDT(key = 'cpf') %>% 
     unique()
+  
+  df_cpf <- df_cpf[!is.na(tp_logradouro)]
   
   files2 <- list.files(here::here('data-raw',metro,'RAIS'))
   
@@ -56,38 +161,88 @@ get_everyone <- function(metro){
   df_rais <- data.table::setDT(df_rais, key = 'cpf')
   df_rais <- df_rais[cpf %in% df_cpf$cpf,!c('emp_31dez')]
   
+  df_rais <- df_rais[, data_adm := gsub('jan','/01/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('feb','/02/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('mar','/03/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('apr','/04/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('may','/05/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('jun','/06/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('jul','/07/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('aug','/08/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('sep','/09/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('oct','/10/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('nov','/11/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('dec','/12/',data_adm)]
+  df_rais <- df_rais[, data_adm := gsub('/','-',data_adm)]
+  
+  df_rais <- df_rais[, data_deslig := gsub('jan','/01/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('feb','/02/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('mar','/03/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('apr','/04/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('may','/05/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('jun','/06/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('jul','/07/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('aug','/08/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('sep','/09/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('oct','/10/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('nov','/11/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('dec','/12/',data_deslig)]
+  df_rais <- df_rais[, data_deslig := gsub('/','-',data_deslig)]
+  
+  df_rais <- df_rais[, address := gsub(",,",",",address)] 
+  df_rais <- df_rais[, address := gsub("^R \\s+","RUA ",address)] 
+  df_rais <- df_rais[, address := gsub("^R. \\s+","RUA ",address)] 
+  df_rais <- df_rais[, address := gsub("^AV \\s+","AVENIDA ",address)] 
+  df_rais <- df_rais[, address := gsub("^AV. \\s+","AVENIDA ",address)] 
+  df_rais <- df_rais[, address := gsub("^AL \\s+","ALAMEDA ",address)] 
+  df_rais <- df_rais[, address := gsub("^AL. \\s+","ALAMEDA ",address)] 
+  df_rais <- df_rais[, address := gsub("^PC \\s+","PRACA ",address)] 
+  df_rais <- df_rais[, address := gsub("^PC. \\s+","PRACA ",address)] 
+  df_rais <- df_rais[, address := gsub("^EST \\s+","ESTRADA ",address)] 
+  df_rais <- df_rais[, address := gsub("^EST. \\s+","ESTRADA ",address)] 
+  df_rais <- df_rais[, address := gsub("^ESTR \\s+","ESTRADA ",address)] 
+  df_rais <- df_rais[, address := gsub("^ESTR. \\s+","ESTRADA ",address)]
+  df_rais <- df_rais[, address := gsub("^ROD \\s+","RODOVIA ",address)] 
+  df_rais <- df_rais[, address := gsub("^ROD. \\s+","RODOVIA ",address)]
+  
+  df_rais <- df_rais[, address := gsub("DR.  ","DOUTOR ",address)] 
+  df_rais <- df_rais[, address := gsub("PROF. ","PROFESSOR ",address)] 
+  df_rais <- df_rais[, address := gsub("ENG. ","ENGENHEIRO ",address)] 
+  df_rais <- df_rais[, address := gsub("PRES. ","PRESIDENTE ",address)] 
+  df_rais <- df_rais[, address := gsub("DR  ","DOUTOR ",address)] 
+  df_rais <- df_rais[, address := gsub("PROF ","PROFESSOR ",address)] 
+  df_rais <- df_rais[, address := gsub("ENG ","ENGENHEIRO ",address)] 
+  df_rais <- df_rais[, address := gsub("PRES ","PRESIDENTE ",address)] 
+  
+  df_rais <- df_rais[, address := gsub("S/N","SN",address)]
+  
+  df1 <- stringr::str_split_fixed(df_rais$address, ", ",n=2) %>% as.data.frame()
+  df2 <- stringr::str_split_fixed(df1$V2, " - ",n=2) %>% as.data.frame()
+  
+  df_rais <- df_rais[, logradouro := df1$V1]
+  df_rais <- df_rais[, numero := df2$V1]
+  df_rais <- df_rais[, localidade := df2$V2]
+
+  df_cpf <- df_cpf %>% 
+    dplyr::group_by(cpf) %>% 
+    dplyr::mutate(id_pessoa = dplyr::cur_group_id()) %>% 
+    dplyr::ungroup() %>% 
+    data.table::setDT(key = 'id_pessoa')
+  
+  df_rais <- data.table::merge.data.table(df_rais,
+                                          df_cpf[,.(cpf, id_pessoa)],
+                                        all.x = TRUE,
+                                        by = 'cpf') %>% 
+    data.table::setDT(key = 'id_pessoa')
+  
   readr::write_rds(df_cpf, here::here('data',metro,paste0('people_',metro,'.rds')), compress = 'gz')
   readr::write_rds(df_rais, here::here('data',metro,paste0('panel_',metro,'.rds')), compress = 'gz')
+  readr::write_rds(df_cpf[,!c('cpf')], here::here('data',metro,paste0('people_anon_',metro,'.rds')), compress = 'gz')
+  readr::write_rds(df_rais[,!c('cpf')], here::here('data',metro,paste0('panel_anon_',metro,'.rds')), compress = 'gz')
   
 }
 
 metros <- metros_br$ab_metro %>% unique()
 purrr::walk(.x = metros,.f = get_everyone)
 
-anonimize <- function(metro){
-  
-  message('Working on, ', metro)
-  
-  people <- readr::read_rds(here::here('data',metro,paste0('people_',metro,'.rds'))) %>% data.table::setDT(key = 'cpf')
-  panel  <- readr::read_rds(here::here('data',metro,paste0('panel_',metro,'.rds'))) %>% data.table::setDT(key = 'cpf')
-  
-  people <- people %>% 
-    dplyr::group_by(cpf) %>% 
-    dplyr::mutate(id_pessoa = dplyr::cur_group_id()) %>% 
-    dplyr::ungroup() %>% 
-    data.table::setDT(key = 'id_pessoa')
-  
-  panel <- data.table::merge.data.table(panel,
-                                        people[,.(cpf, id_pessoa)],
-                                        all.x = TRUE,
-                                        by = 'cpf') %>% 
-    data.table::setDT(key = 'id_pessoa')
-  
-  readr::write_rds(people, here::here('data',metro,paste0('people_',metro,'.rds')), compress = 'gz')
-  readr::write_rds(panel, here::here('data',metro,paste0('panel_',metro,'.rds')), compress = 'gz')
-  readr::write_rds(people[,!c('cpf')], here::here('data',metro,paste0('people_anon_',metro,'.rds')), compress = 'gz')
-  readr::write_rds(panel[,!c('cpf')], here::here('data',metro,paste0('panel_anon_',metro,'.rds')), compress = 'gz')
-}
 
-metros <- metros_br$ab_metro %>% unique()
-purrr::walk(.x = metros,.f = anonimize)
