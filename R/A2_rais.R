@@ -47,22 +47,7 @@ read_rais <- function(year, metros = 'all'){
   
   df_estab <- df_estab[id_estab %nin% filtro$id_estab]
   
-  #geocode <- readr::read_csv(here::here('data', 'geocode_cep.csv'))
-  
-  #data.table::setkey(df_estab, key = 'cep')
-  
-  #df_estab <- data.table::merge.data.table(df_estab,
-   #                                      geocode,
-    #                                     all.x = TRUE,
-     #                                    by.x = 'cep',
-      #                                   by.y = 'cep_match') %>% unique()
-  
   data.table::setkey(df_estab, key = 'id_estab')
-  
-  #na_merge <- df_estab[is.na(lat),.(id_estab,cnpj_raiz,codemun,endereco,lon,lat)]
-  
-  #readr::write_rds(na_merge, here::here('data','RAIS', paste0('NAs_',year,'.rds')))
-  #readr::write_rds(df_estab, here::here('data','RAIS', paste0('estab_',year,'.rds')),compress = 'gz')
   
   # Data on workers
 

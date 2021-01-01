@@ -82,9 +82,6 @@ read_cadunico <- function(year, metros = 'all'){
   
   data.table::setkey(df_pessoa, key = 'co_familiar_fam')
 
-  # Save
-  #readr::write_rds(df_pessoa, here::here('data',"CadUnico",year, paste0('01.1.cad_pessoa_',year,'.rds')))
-
   ### 3. Create final dataset (merge people and families)  ###
 
   # Merge datasets
@@ -94,18 +91,6 @@ read_cadunico <- function(year, metros = 'all'){
                                           by = 'co_familiar_fam')
   
    rm(df_pessoa,df_familia)
-  
-  # Geocode
-  
-  #geocode <- data.table::fread(here::here('data', 'geocode_cep.csv'))
-  
-  #data.table::setkey(df_cad, key = 'nu_cep_logradouro_fam')
-  
-  #df_cad <- data.table::merge.data.table(df_cad,
-  #                                       geocode,
-  #                                       all.x = TRUE,
-  #                                       by.x = 'nu_cep_logradouro_fam',
-  #                                       by.y = 'cep_match')
   
     df_cad <- df_cad %>% dplyr::select(cpf = nu_cpf_pessoa,
                                        nis = nu_nis_pessoa,
