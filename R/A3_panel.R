@@ -274,7 +274,7 @@ get_everyone <- function(metro){
                                         by = 'cpf') %>% 
     data.table::setDT(key = 'id_pessoa') %>% unique()
   
-  df_rais <- df_rais[, !c(id_pessoa,cpf,id_estab,data_adm,data_deslig,grau_instr,
+  df_rais <- df_rais[, .(id_pessoa,cpf,id_estab,data_adm,data_deslig,grau_instr,
                           salario,horas_contr,rem_med_r,rem_med_sm,temp_empr,
                           subs_ibge,logradouro,numero,localidade,codemun,cep)]
   
