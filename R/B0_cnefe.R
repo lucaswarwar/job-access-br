@@ -1,3 +1,6 @@
+# B0: read and clean CNEFE data
+# CNEFE: Cadastro Nacional de endereços para fins estatísticos
+
 source('setup.R')
 
 #metro <- 'spo'
@@ -50,7 +53,7 @@ read_cnefe <- function(metro){
   cnefe <- cnefe[, CD_IBGE := paste0(UF,CD_MUN)]
   cnefe <- cnefe[, .(CD_IBGE,TP_LOGRADOURO,NO_LOGRADOURO,NU_LOGRADOURO,LOCALIDADE,CEP,LAT,LON)]
   
-  readr::write_rds(cnefe, here::here('data-raw','CNEFE',paste0('cnefe_',metro,'.rds')),compress = 'gz')
+  readr::write_rds(cnefe, here::here('geocode','CNEFE',paste0('cnefe_',metro,'.rds')),compress = 'gz')
 }
 
 metros <- metros_br$ab_metro %>% unique()

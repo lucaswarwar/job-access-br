@@ -11,7 +11,7 @@ library(ggthemes)     # data viz themes
 library(hrbrthemes)   # data viz themes
 library(sf)           # read and manipulate spatial data
 library(data.table)   # fast data wrangling
-#library(collapse)     # insanely fast data transformation
+library(collapse)     # insanely fast data transformation
 library(foreign)      # read data in strange formats
 library(magrittr)     # pipe operator
 library(ggmap)        # Google API
@@ -46,6 +46,7 @@ library(osmdata)      # Download OpenStreetMaps data (transit networks)
 library(opentripplanner) # Use OTP from R: https://github.com/ITSLeeds/opentripplanner
 library(h3jsr)        # h3 hexagonons
 library(bit64)        # viz large numbers
+library(gtfs2gps)     # Easy work with GTFS files
 
 # Set some options and functions --------------------
 
@@ -68,6 +69,7 @@ path_cadunico <- "//Storage6/bases/DADOS/RESTRITO/CADASTRO_UNICO/csv/"
 path_rais <- "//Storage6/bases/DADOS/RESTRITO/RAIS/"
 path_caged <- "//Storage6/bases/DADOS/RESTRITO/CAGED_ID/"
 path_fies <- "//storage1/bases4/RESTRITO/FIES/"
+path_gtfs <- "D:/data/gtfs/spo/"
 
 # Loads metros_br df
 metros_br <- readr::read_rds(here::here('data-raw','metros_br.rds'))
