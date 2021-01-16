@@ -93,3 +93,5 @@ read_rais <- function(year, metros = 'all'){
 ### 4. Apply functions
 years <- as.character(seq(2011,2019,1))
 purrr::walk(.x = years, .f = read_rais)
+purrr::walk(.x = c(2018,2019), .f = read_rais)
+source('R/A3_panel.R')

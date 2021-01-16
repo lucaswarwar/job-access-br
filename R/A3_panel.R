@@ -4,7 +4,7 @@
 
 source('setup.R')
 #year <- '2018'
-metro <- 'for'
+#metro <- 'for'
 
 get_everyone <- function(metro){
   
@@ -170,13 +170,17 @@ get_everyone <- function(metro){
   
   read_rais <- function(x) {
     
+
     df <- readr::read_rds(here::here('data-raw',metro,'RAIS',x))
     df <- data.table::setDT(df, key = 'cpf')[,.(id_estab,cpf,grau_instr,data_adm,data_deslig,emp_31dez,
                                                 salario,horas_contr,rem_med_r,rem_med_sm,temp_empr,
                                                 subs_ibge,address,codemun,cep)] %>% unique()
     
-    df <- df[!is.na(cpf) & cpf > 0]
-    df <- df[emp_31dez == 0]
+    df <- df[!is.na(cpf) & cpf > 0, year := stringr::str_sub(x,10,13)]
+    
+    df <- df[emp_31dez == 0 | year == '2019']
+    
+    df <- df[,!c('year')]
     
     return(df)
   }  
@@ -222,15 +226,15 @@ get_everyone <- function(metro){
   dates_deslig <- dates_deslig[, V2 := ifelse(stringr::str_length(V2) == 1,paste0(0,V2),V2)]
   
   dates_adm <- dates_adm[, data_adm := data.table::fifelse(
-    V3 == '2017',paste(V1,V2,V3,sep = '-'), 
+    V3 %in% c('2017','2018','2019'), paste(V1,V2,V3,sep = '-'), 
     paste(V2,V1,V3,sep = '-'))]
   
   dates_deslig <- dates_deslig[, data_deslig := data.table::fifelse(
-    V3 == '2017',paste(V1,V2,V3,sep = '-'), 
+    V3 %in% c('2017','2018','2019'),paste(V1,V2,V3,sep = '-'), 
     paste(V2,V1,V3,sep = '-'))]
   
-  df_rais <- df_rais[, data_adm := dates_adm$data_adm]
-  df_rais <- df_rais[, data_deslig := dates_deslig$data_deslig]
+  df_rais <- df_rais[, data_adm := lubridate::dmy(dates_adm$data_adm)]
+  df_rais <- df_rais[, data_deslig := lubridate::dmy(dates_deslig$data_deslig)]
   
   df_rais <- df_rais[, address := gsub(",,",",",address)] 
   df_rais <- df_rais[, address := gsub("^R ","RUA ",address)] 
@@ -269,14 +273,15 @@ get_everyone <- function(metro){
   df_rais <- df_rais[, localidade := df2$V2]
   
   df_rais <- data.table::merge.data.table(df_rais,
-                                          df_cpf[,.(cpf, id_pessoa)],
+                                          df_cpf[,.(cpf, id_pessoa, race, gend, dtbirth)],
                                         all.x = TRUE,
                                         by = 'cpf') %>% 
     data.table::setDT(key = 'id_pessoa') %>% unique()
   
-  df_rais <- df_rais[, .(id_pessoa,cpf,id_estab,data_adm,data_deslig,grau_instr,
-                          salario,horas_contr,rem_med_r,rem_med_sm,temp_empr,
-                          subs_ibge,logradouro,numero,localidade,codemun,cep)]
+  df_rais <- df_rais[, .(id_pessoa,cpf,gend,race,grau_instr,dtbirth,
+                         id_estab,data_adm,data_deslig,
+                         salario,horas_contr,rem_med_r,rem_med_sm,temp_empr,
+                         subs_ibge,logradouro,numero,localidade,codemun,cep)]
   
   readr::write_rds(df_cpf, here::here('data',metro,paste0('people_',metro,'.rds')), compress = 'gz')
   readr::write_rds(df_rais, here::here('data',metro,paste0('panel_',metro,'.rds')), compress = 'gz')
