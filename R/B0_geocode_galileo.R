@@ -47,10 +47,27 @@ input_galileo3 <- people[Cidade %nin% regmet$name_city] %>% readr::write_delim(d
 
 # Load Galileo Output
 
-input <- data.table::fread(here::here('data','geocode','input_galileo_1.csv'), encoding = 'UTF-8')
-output <- data.table::fread(here::here('data','geocode','output_galileo_1.csv'), encoding = 'Latin-1')
+input <- data.table::fread(here::here('data','geocode','input_galileo_1.csv'), encoding = 'Latin-1') %>% 
+  dplyr::bind_rows(data.table::fread(here::here('data','geocode','input_galileo_2.csv'), encoding = 'Latin-1'))
 
-janitor::tabyl(output, PrecisionDepth)
+output <- data.table::fread(here::here('data','geocode','output_galileo_1.csv'), 
+                            encoding = 'Latin-1',colClasses = 'c') %>% 
+  dplyr::bind_rows(data.table::fread(here::here('data','geocode','output_galileo_2.csv'), 
+                                     encoding = 'Latin-1',fill = T,colClasses = 'c'))
+
+# Fix 12 rows from RJ that were read wrongly
+
+output_na <- output[Estado == '']
+output <- output[Estado != ""]
+
+fwrite(output_na,here::here('data','geocode','output_1_2_na.csv'))
+output_na <- data.table::fread(here::here('data','geocode','output_1_2_na_fixed.csv'),colClasses = 'character')
+
+output <- dplyr::bind_rows(output, output_na)
+
+janitor::tabyl(output,PrecisionDepth, Cidade)
+
+readr::write_rds(output,here::here('data','geocode','geocode_RM.rds'))
 
 # Load people from SP
 
